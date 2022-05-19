@@ -1,0 +1,101 @@
+#include <iostream>
+
+using namespace std;
+
+struct node{
+    int data;
+    unsigned char height;
+    struct node *left;
+    struct node *right;
+    node(int k) { data = k; left = right = 0; height = 1; }
+};
+
+void inorder(struct node *root);
+struct node *insert(struct node *node, int n);
+struct node *newNode(int item);
+unsigned char height(node* p);
+int bfactor(node* p);
+void fixheight(node* p);
+node* rotateright(node* p);
+node* rotateleft(node* q);
+node* balance(node* p);
+
+int main(){
+    setlocale(LC_ALL, "rus");
+    // 1 2 3 4 5 6 7
+    node *root = new node(6);
+    insert(root,2);
+    insert(root,1);
+    insert(root,3);
+    insert(root,5);
+    insert(root,7);
+    inorder(root);
+    
+    return 0;
+}
+void inorder(struct node *root)
+{
+    if (root != NULL) {
+        inorder(root->left);
+        cout << root->data << " -> ";
+        inorder(root->right);
+  }
+}
+node* insert(node* p, int k)
+{
+    if( !p ) return new node(k);
+    if( k<p->data )
+        p->left = insert(p->left,k);
+    else
+        p->right = insert(p->right,k);
+    return balance(p);
+}
+unsigned char height(node* p)
+{
+    return p?p->height:0;
+}
+int bfactor(node* p)
+{
+    return height(p->right)-height(p->left);
+}
+void fixheight(node* p)
+{
+    unsigned char hl = height(p->left);
+    unsigned char hr = height(p->right);
+    p->height = (hl>hr?hl:hr)+1;
+}
+node* rotateright(node* p)
+{
+    node* q = p->left;
+    p->left = q->right;
+    q->right = p;
+    fixheight(p);
+    fixheight(q);
+    return q;
+}
+node* rotateleft(node* q)
+{
+    node* p = q->right;
+    q->right = p->left;
+    p->left = q;
+    fixheight(q);
+    fixheight(p);
+    return p;
+}
+node* balance(node* p)
+{
+    fixheight(p);
+    if( bfactor(p)==2 )
+    {
+        if( bfactor(p->right) < 0 )
+            p->right = rotateright(p->right);
+        return rotateleft(p);
+    }
+    if( bfactor(p)==-2 )
+    {
+        if( bfactor(p->left) > 0  )
+            p->left = rotateleft(p->left);
+        return rotateright(p);
+    }
+    return p;
+}
